@@ -1,8 +1,8 @@
+#include <stdlib.h>
 #include <stdio.h>
 #include <sys/types.h> 
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
@@ -19,14 +19,14 @@ void error(char *msg)
 int main(int argc, char *argv[])
 {
      int sockfd, newsockfd, clilen;
-     char buffer[256];
      struct sockaddr_in serv_addr, cli_addr;
-     int n, pid;
+     int pid;
+	 int fd[2];
 
      sockfd = socket(AF_INET, SOCK_STREAM, 0);
 
      if (sockfd < 0) 
-        error((const char *) "ERROR opening socket");
+        perror((const char *) "ERROR opening socket");
 
      bzero((char *) &serv_addr, sizeof(serv_addr));
      serv_addr.sin_family = AF_INET;
@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
      serv_addr.sin_port = htons(PORT_NUMBER);
 
      if (bind(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) 
-              error((const char *)"ERROR on binding");
+              perror((const char *)"ERROR on binding");
 
 	 // This block listens and creates new sockets (per connection?)
 	 // N.B. that accept() halts execution until it makes a connection.
@@ -43,15 +43,17 @@ int main(int argc, char *argv[])
 
 	 while(1)
 	 {
-		 newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
+		 newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr,
+				 (socklen_t *) &clilen);
 
 		 if (newsockfd < 0) 
-			  error((const char *) "ERROR on accept");
+			  perror((const char *) "ERROR on accept");
 
+		 pipe(fd);
 		 pid = fork();
 
 		 if (pid < 0){
-			 error((const char *) "ERROR on fork");
+			 perror((const char *) "ERROR on fork");
 		 }
 
 		 if (pid == 0)
@@ -91,9 +93,9 @@ void chat(int sock)
 	printf("Read from socket\n");
 
 	if (n < 0)
-		error((const char *) "ERROR reading from socket");
+		perror((const char *) "ERROR reading from socket");
 
 	n = write(sock, "i got the message", 17);
 	if (n < 0)
-		error((const char *) "ERROR writing to socket");
+		perror((const char *) "ERROR writing to socket");
 }

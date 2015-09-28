@@ -3,6 +3,8 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <string.h>
+#include <unistd.h>
 #include <netdb.h> 
 
 #define PORT_NUMBER 40000
@@ -25,7 +27,7 @@ int main(int argc, char *argv[])
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
 
     if (sockfd < 0) 
-        error((const char *) "ERROR opening socket");
+        perror((const char *) "ERROR opening socket");
 
     server = gethostbyname(SERVER_NAME);
 
@@ -37,7 +39,7 @@ int main(int argc, char *argv[])
     serv_addr.sin_port = htons(PORT_NUMBER);
 
     if (connect(sockfd,(struct sockaddr *)&serv_addr,sizeof(serv_addr)) < 0) 
-        error((const char *)"ERROR connecting");
+        perror((const char *)"ERROR connecting");
 
     printf("Please enter the message: ");
     bzero(buffer,256);
@@ -45,13 +47,13 @@ int main(int argc, char *argv[])
     n = write(sockfd,buffer,strlen(buffer));
 
     if (n < 0) 
-         error((const char *)"ERROR writing to socket");
+         perror((const char *)"ERROR writing to socket");
 
     bzero(buffer,256);
     n = read(sockfd,buffer,255);
 
     if (n < 0) 
-         error((const char *)"ERROR reading from socket");
+         perror((const char *)"ERROR reading from socket");
 
     printf("%s\n",buffer);
     return 0;
