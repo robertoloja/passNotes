@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
 
     server = gethostbyname(SERVER_NAME);
 
-    bzero((char *) &serv_addr, sizeof(serv_addr));
+    memset(&serv_addr, 0, sizeof(serv_addr));
     serv_addr.sin_family = AF_INET;
     bcopy((char *)server->h_addr, 
          (char *)&serv_addr.sin_addr.s_addr,
@@ -42,14 +42,14 @@ int main(int argc, char *argv[])
         perror((const char *)"ERROR connecting");
 
     printf("Please enter the message: ");
-    bzero(buffer,256);
+    memset(buffer, 0, 256);
     fgets(buffer,255,stdin);
     n = write(sockfd,buffer,strlen(buffer));
 
     if (n < 0) 
          perror((const char *)"ERROR writing to socket");
 
-    bzero(buffer,256);
+    memset(buffer, 0, 256);
     n = read(sockfd,buffer,255);
 
     if (n < 0) 
