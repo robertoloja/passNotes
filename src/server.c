@@ -1,98 +1,111 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <sys/types.h> 
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <string.h>
-#include <unistd.h>
+#include "passNotes.h"
+#include <signal.h>
+#include <sys/wait.h>
 
-#define PORT_NUMBER 40000
-#define MAX_MSG_LENGTH 1024
+#define ID 1 // Client is 0
 
-typedef struct
+void sigchld_handler(int s)
 {
-	int childToParent[2];
-	int parentToChild[2];
-} pipes;
+	int saved_errno = errno;
+	while(waitpid(-1, NULL, WNOHANG) > 0);
 
-void chat(int sock);
-
-void error(char *msg)
-{
-    perror(msg);
-    exit(1);
+	errno = saved_errno;
 }
-
-char lastMessage[MAX_MSG_LENGTH];
-
-int main(int argc, char *argv[])
+int main(void)
 {
-     int sockfd, newsockfd, clilen;
-     struct sockaddr_in serv_addr, cli_addr;
-     int pid;
-	 //pipes commPipes;
+	int sockfd, new_fd; 
+	struct addrinfo hints, *servinfo;
+	struct sockaddr_storage client_addr;
+	socklen_t sin_size;
+	struct sigaction sa;
+	int yes = 1;
+	char s[INET6_ADDRSTRLEN];
+	int rv;
+	char msgBuffer[MAX_MSG_SIZE];
+	int bytesReceived;
 
-     sockfd = socket(AF_INET, SOCK_STREAM, 0);
+	memset(&hints, 0, sizeof hints);
+	hints.ai_family = AF_UNSPEC;
+	hints.ai_socktype = SOCK_STREAM;
+	hints.ai_flags = AI_PASSIVE;
 
-     if (sockfd < 0) 
-        perror((const char *) "ERROR opening socket");
+	if ((rv = getaddrinfo(NULL, PORT, &hints, &servinfo)) != 0)
+	{
+		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
+		return 1;
+	}
 
-     memset(&serv_addr, 0, sizeof(serv_addr));
-     serv_addr.sin_family = AF_INET;
-     serv_addr.sin_addr.s_addr = INADDR_ANY;
-     serv_addr.sin_port = htons(PORT_NUMBER);
+	// For this to be useful online (read: not just on localhost), this
+	// line should be changed to iterate over the linked list that 
+	// starts at servinfo until a socket can be created.
+	sockfd = socket(servinfo->ai_family, servinfo->ai_socktype,
+			servinfo->ai_protocol);
 
-     if (bind(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) 
-              perror((const char *)"ERROR on binding");
+	// Allow port reuse.
+	if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1)
+	{
+		perror("setsockopt");
+		exit(1);
+	}
 
-     listen(sockfd,5);
-     clilen = sizeof(cli_addr);
+	if (bind(sockfd, servinfo->ai_addr, servinfo->ai_addrlen) == -1)
+	{
+		close(sockfd);
+		perror("server: bind");
+	}
 
-	 while(1)
-	 {
-		 newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr,
-				 (socklen_t *) &clilen);
+	freeaddrinfo(servinfo);
 
-		 if (newsockfd < 0) 
-			  perror((const char *) "ERROR on accept");
+	if (listen(sockfd, BACKLOG) == -1)
+	{
+		perror("listen");
+		exit(1);
+	}
 
-		 /* Establish two way communication with children processes.
-		 pipe(commPipes.childToParent);
-		 pipe(commPipes.parentToChild); */
-		 pid = fork();
+	sa.sa_handler = sigchld_handler; // reap dead processes
+	sigemptyset(&sa.sa_mask);
+	sa.sa_flags = SA_RESTART;
+	if (sigaction(SIGCHLD, &sa, NULL) == -1)
+	{
+		perror("sigaction");
+		exit(1);
+	}
 
-		 if (pid < 0){
-			 perror((const char *) "ERROR on fork");
-		 }
+	printf("server: waiting for connections...\n");
 
-		 if (pid == 0)
-		 {
-			 close(sockfd);
-			 /*close(commPipes.parentToChild[1]);
-			 close(commPipes.childToParent[0]);*/
-			 chat(newsockfd);
-			 exit(0);
-		 } else {
-			 close(newsockfd);
-			 /*close(commPipes.parentToChild[0]);
-			 close(commPipes.childToParent[1]);*/
-		 }
-	 }
-     return 0; 
-}
+	while(1)
+	{
+		sin_size = sizeof client_addr;
+		new_fd = accept(sockfd, (struct sockaddr *) &client_addr, &sin_size);
+		if (new_fd == -1)
+		{
+			perror("accept");
+			continue;
+		}
 
-void chat(int sock)
-{
-	int n;
+		inet_ntop(client_addr.ss_family, get_in_addr((struct sockaddr *)
+					&client_addr), s, sizeof s);
+		printf("server: got connection from %s\n", s);
 
-	memset(&lastMessage, 0, MAX_MSG_LENGTH);
-	n = read(sock, lastMessage, MAX_MSG_LENGTH);
-	printf("Read from socket: %s\n", lastMessage);
+		// Replace with threads.
+		// This entire conditional is misguided.
+		if (!fork())
+		{
+			if ((bytesReceived = recv(new_fd, msgBuffer, MAX_MSG_SIZE - 1,
+						   	0)) == -1)
+			{
+				perror("recv");
+				exit(1);
+			}
 
-	if (n < 0)
-		perror((const char *) "ERROR reading from socket");
+			msgBuffer[bytesReceived] = '\0';
 
-	n = write(sock, lastMessage, sizeof(lastMessage));
-	if (n < 0)
-		perror((const char *) "ERROR writing to socket");
+			// Expect a command.
+			if (msgBuffer[0] == '/')
+			{
+				handleCommands((const char *) msgBuffer, new_fd, ID);
+			}
+		}
+		close(new_fd);
+	}
 }

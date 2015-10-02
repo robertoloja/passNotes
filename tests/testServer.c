@@ -1,16 +1,18 @@
 #include "../src/passNotes.h"
 
 #define SERVER_NAME "localhost"
-#define TEST_MSG_SIZE 16
+#define TEST_MSG "Test_Message"
+#define TEST_MSG_SIZE 13
+#define ID 0 // Server is 1. Client is 0.
 
 int main(void)
 {
-	int sockfd;							// Will hold socket file descriptor.
+	int sockfd;	
 	struct addrinfo hints, *servinfo;
 	int rv;
 	char s[INET6_ADDRSTRLEN];
-	char testMsg[] = "/Test_Message";
-	char msgBuffer[TEST_MSG_SIZE];
+	int bytesReceived;
+	char msgBuffer[MAX_MSG_SIZE];
 
 	memset(&hints, 0, sizeof hints);
 	hints.ai_family = AF_UNSPEC;		// Friendly to IPv4 and IPv6.
@@ -55,17 +57,18 @@ int main(void)
 
 	printf("\nSending test message to %s:\t", SERVER_NAME);
 
-	if (send(sockfd, testMsg, sizeof(testMsg) / sizeof('a'), 0) !=
-			sizeof testMsg)
+	if (send(sockfd, TEST_MSG, TEST_MSG_SIZE, 0) != TEST_MSG_SIZE)
 	{
 		printf(RED "FAILED%s", NONE);
 	} else {
 		printf(GREEN "PASSED%s", NONE);
 	}
 
-	printf("\nReceiving test message from %s:\t", SERVER_NAME);
+	printf("\nUsing the /ping command:\t\t");
 
-	if (recv(sockfd, msgBuffer, TEST_MSG_SIZE, 0) != TEST_MSG_SIZE)
+	if (handleCommands((const char *) "/ping", sockfd, 0) == -1 ||
+		(bytesReceived = recv(sockfd, msgBuffer, MAX_MSG_SIZE - 1, 0) == -1) ||
+		(strcasecmp(msgBuffer, (const char *) "pong!") != 0 ))
 	{
 		printf(RED "FAILED%s", NONE);
 	} else {

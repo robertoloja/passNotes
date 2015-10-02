@@ -6,9 +6,11 @@
 #include <string.h>
 #include <unistd.h>
 #include <netdb.h> 
+#include <errno.h>
 
 #define PORT_NUMBER 40000
 #define SERVER_NAME "localhost"
+#define ID 0
 
 void error(char *msg)
 {
