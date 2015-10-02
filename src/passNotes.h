@@ -1,7 +1,17 @@
 #ifndef PASSNOTES_H
 #define PASSNOTES_H
 
+#include <stdlib.h>
+#include <stdio.h>
+#include <sys/types.h>
+#include <sys/socket.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
+#include <string.h>
+#include <unistd.h>
+#include <netdb.h> 
+#include <errno.h>
+
 #define PORT "40000"
 #define MAX_MSG_SIZE 1024
 
