@@ -1,6 +1,7 @@
 #include "../src/passNotes.h"
 
 #define SERVER_NAME "localhost"
+#define TEST_MSG_SIZE 16
 
 int main(void)
 {
@@ -8,7 +9,8 @@ int main(void)
 	struct addrinfo hints, *servinfo;
 	int rv;
 	char s[INET6_ADDRSTRLEN];
-	char testMsg[] = "Test Message";
+	char testMsg[] = "/Test_Message";
+	char msgBuffer[TEST_MSG_SIZE];
 
 	memset(&hints, 0, sizeof hints);
 	hints.ai_family = AF_UNSPEC;		// Friendly to IPv4 and IPv6.
@@ -61,5 +63,16 @@ int main(void)
 		printf(GREEN "PASSED%s", NONE);
 	}
 
+	printf("\nReceiving test message from %s:\t", SERVER_NAME);
+
+	if (recv(sockfd, msgBuffer, TEST_MSG_SIZE, 0) != TEST_MSG_SIZE)
+	{
+		printf(RED "FAILED%s", NONE);
+	} else {
+		printf(GREEN "PASSED%s", NONE);
+	}
+
 	printf("\n\n");
+
+	// TODO: Use threads to simulate multiple users.
 }
