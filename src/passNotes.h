@@ -15,14 +15,23 @@
 #define PORT "40000"
 #define MAX_MSG_SIZE 1024
 #define BACKLOG 5
+#define MAX_NICK_LENGTH 21
 
 /* Following is a hacky way to get color text. Including one of the following
 strings at the start of a printf will make ALL text the corresponding color
 until the "NONE" color is included in a printf. 
-This gets used in the tests for colored PASS and FAIL messages. */
+This gets used in the tests for colored PASS and FAIL messages. Needless to
+say, this is non-portable. */
 #define RED "\x1B[31m"
 #define GREEN "\x1B[32m"
 #define NONE "\x1B[0m"
+
+// Client information struct.
+typedef struct 
+{
+	char name[MAX_NICK_LENGTH];	// User display name.
+	int talkingIn = 0;			// Channel number (0 = global)
+} User;
 
 // This function helps provide IP agnosticism re: IPv4 or IPv6.
 void *get_in_addr(struct sockaddr *sa)
