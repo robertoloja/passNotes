@@ -89,7 +89,7 @@ int main(void)
 
 		// Replace with threads.
 		// This entire conditional is misguided.
-		if (!fork())
+		/*if (!fork())
 		{
 			if ((bytesReceived = recv(new_fd, msgBuffer, MAX_MSG_SIZE - 1,
 						   	0)) == -1)
@@ -105,7 +105,7 @@ int main(void)
 			{
 				handleCommands((const char *) msgBuffer, new_fd, ID);
 			}
-		}
+		}*/
 		close(new_fd);
 	}
 }

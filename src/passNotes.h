@@ -30,7 +30,7 @@ say, this is non-portable. */
 typedef struct 
 {
 	char name[MAX_NICK_LENGTH];	// User display name.
-	int talkingIn = 0;			// Channel number (0 = global)
+	int talkingIn;			// Channel number (0 = global)
 } User;
 
 // This function helps provide IP agnosticism re: IPv4 or IPv6.
