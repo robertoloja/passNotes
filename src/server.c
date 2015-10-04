@@ -1,16 +1,16 @@
+//TODO: REFACTOR REFACTOR REFACTOR
+//TODO: TESTS TESTS TESTS
 #include "passNotes.h"
 #include <signal.h>
 #include <sys/wait.h>
+#include <pthread.h>
 
-#define ID 1 // Client is 0
+#define ID 0 // Client is 1
 
-void sigchld_handler(int s)
-{
-	int saved_errno = errno;
-	while(waitpid(-1, NULL, WNOHANG) > 0);
+void sigchld_handler(int s);
+int chat(User usr);
+void *connectToChat(void *clientInfo);
 
-	errno = saved_errno;
-}
 int main(void)
 {
 	int sockfd, new_fd; 
@@ -21,8 +21,12 @@ int main(void)
 	int yes = 1;
 	char s[INET6_ADDRSTRLEN];
 	int rv;
-	char msgBuffer[MAX_MSG_SIZE];
-	int bytesReceived;
+	pthread_t clients[MAX_CLIENTS];
+	int nextThread = 0;
+	User users[MAX_CLIENTS];
+
+	//char msgBuffer[MAX_MSG_SIZE];
+	//int bytesReceived;
 
 	memset(&hints, 0, sizeof hints);
 	hints.ai_family = AF_UNSPEC;
@@ -77,6 +81,7 @@ int main(void)
 	{
 		sin_size = sizeof client_addr;
 		new_fd = accept(sockfd, (struct sockaddr *) &client_addr, &sin_size);
+
 		if (new_fd == -1)
 		{
 			perror("accept");
@@ -87,25 +92,36 @@ int main(void)
 					&client_addr), s, sizeof s);
 		printf("server: got connection from %s\n", s);
 
-		// Replace with threads.
-		// This entire conditional is misguided.
-		/*if (!fork())
-		{
-			if ((bytesReceived = recv(new_fd, msgBuffer, MAX_MSG_SIZE - 1,
-						   	0)) == -1)
-			{
-				perror("recv");
-				exit(1);
-			}
+		users[nextThread].sockNum = new_fd;
+		users[nextThread].threadNum = nextThread;
 
-			msgBuffer[bytesReceived] = '\0';
+		pthread_create(&clients[nextThread], NULL, connectToChat,
+			   	(void *) &users[nextThread]);
+		nextThread++;
 
-			// Expect a command.
-			if (msgBuffer[0] == '/')
-			{
-				handleCommands((const char *) msgBuffer, new_fd, ID);
-			}
-		}*/
 		close(new_fd);
 	}
+}
+
+void sigchld_handler(int s)
+{
+	int saved_errno = errno;
+	while(waitpid(-1, NULL, WNOHANG) > 0);
+
+	errno = saved_errno;
+}
+
+void *connectToChat(void *clientInfo)
+{
+	User *usr = (User *) clientInfo;
+	chat(*usr);
+	return NULL;
+}
+
+int chat(User usr)
+{
+	//TODO: A while(1) loop to handle the connection.
+	//TODO: A call to handleCommands.
+	//TODO: Populate the usr struct. I.e. get nickname and channel.
+	return 0;
 }
