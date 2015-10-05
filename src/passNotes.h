@@ -13,10 +13,10 @@
 #include <errno.h>
 
 #define PORT "40000"
-#define MAX_MSG_SIZE 1024
-#define BACKLOG 5
 #define MAX_NICK_LENGTH 21
+#define MAX_MSG_SIZE 1024
 #define MAX_CLIENTS 32
+#define BACKLOG 5
 
 /* Following is a hacky way to get color text. Including one of the following
 strings at the start of a printf will make ALL text the corresponding color
