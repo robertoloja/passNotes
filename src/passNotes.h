@@ -13,9 +13,10 @@
 #include <errno.h>
 
 #define PORT "40000"
-#define MAX_MSG_SIZE 1024
-#define BACKLOG 5
 #define MAX_NICK_LENGTH 21
+#define MAX_MSG_SIZE 1024
+#define MAX_CLIENTS 32
+#define BACKLOG 5
 
 /* Following is a hacky way to get color text. Including one of the following
 strings at the start of a printf will make ALL text the corresponding color
@@ -30,7 +31,9 @@ say, this is non-portable. */
 typedef struct 
 {
 	char name[MAX_NICK_LENGTH];	// User display name.
-	int talkingIn;			// Channel number (0 = global)
+	int talkingIn;	// Channel number (0 = global)
+	int threadNum;	// Index of this client's thread in pthread_t clients[].
+	int sockNum;	// This client's socket file descriptor.
 } User;
 
 // This function helps provide IP agnosticism re: IPv4 or IPv6.
@@ -46,7 +49,7 @@ void *get_in_addr(struct sockaddr *sa)
 int handleCommands(const char *command, int sockfd, int id)
 {
 	// Client sends "/ping", server responds with "pong!", IRC style.
-	if ((strcasecmp(command, (const char *) "/ping") == 0) && (id == 0))
+	if ((strcasecmp(command, (const char *) "/ping") == 0) && (id == 1))
 	{
 		if (send(sockfd, "/ping", 6, 0) == -1)
 		{
@@ -55,7 +58,7 @@ int handleCommands(const char *command, int sockfd, int id)
 		}
 	}
 
-	if ((strcasecmp(command, (const char *) "/ping") == 0) && (id == 1))
+	if ((strcasecmp(command, (const char *) "/ping") == 0) && (id == 0))
 	{
 		if (send(sockfd, "pong!", 6, 0) == -1)
 		{

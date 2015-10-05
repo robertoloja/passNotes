@@ -1,62 +1,55 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <string.h>
-#include <unistd.h>
-#include <netdb.h> 
-#include <errno.h>
+#include "passNotes.h"
 
-#define PORT_NUMBER 40000
-#define SERVER_NAME "localhost"
-#define ID 0
+#define SERVER "localhost"
 
-void error(char *msg)
+int main(void)
 {
-    perror(msg);
-    exit(0);
-}
+	int sockfd, numbytes;
+	char msgBuffer[MAX_MSG_SIZE];
+	struct addrinfo hints, *servinfo, *res;
+	int rv;
+	char s[INET6_ADDRSTRLEN];
 
-int main(int argc, char *argv[])
-{
-    int sockfd, n;
+	memset(&hints, 0, sizeof hints);
+	hints.ai_family = AF_UNSPEC;
+	hints.ai_socktype = SOCK_STREAM;
 
-    struct sockaddr_in serv_addr;
-    struct hostent *server;
-    char buffer[256];
+	if((rv = getaddrinfo(SERVER, PORT, &hints, &servinfo)) != 0)
+	{
+		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
+		return 1;
+	}
 
-    sockfd = socket(AF_INET, SOCK_STREAM, 0);
+	for(res = servinfo; res != NULL; res = res->ai_next)
+	{
+		if((sockfd = socket(res->ai_family, res->ai_socktype, 
+						res->ai_protocol)) == -1)
+		{
+			perror("client: socket");
+			continue;
+		}
 
-    if (sockfd < 0) 
-        perror((const char *) "ERROR opening socket");
+		if(connect(sockfd, res->ai_addr, res->ai_addrlen) == -1)
+		{
+			close(sockfd);
+			perror("client: connect");
+			continue;
+		}
 
-    server = gethostbyname(SERVER_NAME);
+		break;
+	}
 
-    memset(&serv_addr, 0, sizeof(serv_addr));
-    serv_addr.sin_family = AF_INET;
-    bcopy((char *)server->h_addr, 
-         (char *)&serv_addr.sin_addr.s_addr,
-         server->h_length);
-    serv_addr.sin_port = htons(PORT_NUMBER);
+	if(res == NULL)
+	{
+		fprintf(stderr, "client: failed to connect\n");
+		return 2;
+	}
 
-    if (connect(sockfd,(struct sockaddr *)&serv_addr,sizeof(serv_addr)) < 0) 
-        perror((const char *)"ERROR connecting");
+	inet_ntop(res->ai_family, get_in_addr((struct sockaddr *) res->ai_addr),
+			s, sizeof s);
+	printf("client: connecting to %s", s);
 
-    printf("Please enter the message: ");
-    memset(buffer, 0, 256);
-    fgets(buffer,255,stdin);
-    n = write(sockfd,buffer,strlen(buffer));
+	freeaddrinfo(servinfo);
 
-    if (n < 0) 
-         perror((const char *)"ERROR writing to socket");
-
-    memset(buffer, 0, 256);
-    n = read(sockfd,buffer,255);
-
-    if (n < 0) 
-         perror((const char *)"ERROR reading from socket");
-
-    printf("%s\n",buffer);
-    return 0;
+	// All done with preliminary stuff. Actual client code goes in here.
 }
