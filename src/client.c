@@ -1,8 +1,9 @@
 #include "passNotes.h"
 
 #define SERVER "localhost"
+#define ID 1
 
-int chat(User *userInfo);
+int chat(User *userInfo, int sockfd);
 int changeNick(User *userInfo);
 
 int main(void)
@@ -66,9 +67,27 @@ int main(void)
 
 }
 
-int chat(User *userInfo)
+int chat(User *userInfo, int sockfd)
 {
-	return 0;
+	char message[MAX_MSG_SIZE];
+
+	while(1)
+	{
+		printf("Me: ");
+		scanf(" %s", message);
+
+		if(message[0] == '/')
+		{
+			handleCommands(message, sockfd, ID);
+		} else {
+			if(send(sockfd, message, sizeof message, 0) == -1)
+			{
+				perror("send");
+			}
+		}
+
+		return 0;
+	}
 }
 
 int changeNick(User *userInfo)

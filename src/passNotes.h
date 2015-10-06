@@ -45,7 +45,7 @@ void *get_in_addr(struct sockaddr *sa)
 	return &(((struct sockaddr_in6 *) sa)->sin6_addr);
 }
 
-// Handles commands that start with '/'. The id = 0 for client and 1 for server
+// Handles commands that start with '/'. The id = 1 for client and 0 for server
 int handleCommands(const char *command, int sockfd, int id)
 {
 	// Client sends "/ping", server responds with "pong!", IRC style.
