@@ -122,8 +122,19 @@ void *connectToChat(void *clientInfo)
 
 int chat(User *usr)
 {
+	char msgBuffer[MAX_MSG_SIZE] = {0};
+	int bytesReceived;
+	int limit = MAX_MSG_SIZE + MAX_NICK_LENGTH + 2;
+
 	while(1)
 	{
+		memset(&msgBuffer, 0, sizeof msgBuffer);
+
+		if((bytesReceived = recv(usr->sockNum, (void *) msgBuffer, limit,
+					   	MSG_DONTWAIT)) != limit)
+		{
+			perror("recv");
+		}
 	}
 	return 0;
 }
