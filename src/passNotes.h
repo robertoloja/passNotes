@@ -66,6 +66,12 @@ int handleCommands(const char *command, int sockfd, int id)
 			return -1;
 		}
 	}
+
+	if(strcasecmp(command, (const char*) "/quit") == 0)
+	{
+		return 1;
+	}
+
 	return 0;
 }
 

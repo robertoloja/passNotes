@@ -78,7 +78,10 @@ int chat(User *userInfo, int sockfd)
 
 		if(message[0] == '/')
 		{
-			handleCommands(message, sockfd, ID);
+			if(handleCommands(message, sockfd, ID) == 1)
+			{
+				exit(1);
+			}
 		} else {
 			if(send(sockfd, message, sizeof message, 0) == -1)
 			{

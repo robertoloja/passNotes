@@ -69,6 +69,7 @@ int main(void)
 	sa.sa_handler = sigchld_handler; // reap dead processes
 	sigemptyset(&sa.sa_mask);
 	sa.sa_flags = SA_RESTART;
+
 	if (sigaction(SIGCHLD, &sa, NULL) == -1)
 	{
 		perror("sigaction");
@@ -118,7 +119,7 @@ void *connectToChat(void *clientInfo)
 	return NULL;
 }
 
-int chat(User usr)
+int chat(User *usr)
 {
 	//TODO: A while(1) loop to handle the connection.
 	//TODO: A call to handleCommands.
