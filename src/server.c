@@ -1,5 +1,6 @@
 //TODO: REFACTOR REFACTOR REFACTOR
 //TODO: TESTS TESTS TESTS
+//TODO: Work out connection quitting.
 #include "passNotes.h"
 #include <signal.h>
 #include <sys/wait.h>
@@ -8,7 +9,7 @@
 #define ID 0 // Client is 1
 
 void sigchld_handler(int s);
-int chat(User usr);
+int chat(User *usr);
 void *connectToChat(void *clientInfo);
 
 int main(void)
@@ -23,7 +24,7 @@ int main(void)
 	int rv;
 	pthread_t clients[MAX_CLIENTS];
 	int nextThread = 0;
-	User users[MAX_CLIENTS];
+	User users[MAX_CLIENTS] = {{0}};
 
 	//char msgBuffer[MAX_MSG_SIZE];
 	//int bytesReceived;
@@ -115,14 +116,14 @@ void sigchld_handler(int s)
 void *connectToChat(void *clientInfo)
 {
 	User *usr = (User *) clientInfo;
-	chat(*usr);
+	chat(usr);
 	return NULL;
 }
 
 int chat(User *usr)
 {
-	//TODO: A while(1) loop to handle the connection.
-	//TODO: A call to handleCommands.
-	//TODO: Populate the usr struct. I.e. get nickname and channel.
+	while(1)
+	{
+	}
 	return 0;
 }

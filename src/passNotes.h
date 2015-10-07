@@ -30,10 +30,10 @@ say, this is non-portable. */
 // Client information struct.
 typedef struct 
 {
+	int sockNum;	// This client's socket file descriptor.
 	char name[MAX_NICK_LENGTH];	// User display name.
 	int talkingIn;	// Channel number (0 = global)
 	int threadNum;	// Index of this client's thread in pthread_t clients[].
-	int sockNum;	// This client's socket file descriptor.
 } User;
 
 // This function helps provide IP agnosticism re: IPv4 or IPv6.
