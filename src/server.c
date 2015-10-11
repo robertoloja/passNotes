@@ -97,8 +97,14 @@ int main(void)
 		users[nextThread].sockNum = new_fd;
 		users[nextThread].threadNum = nextThread;
 
+		// Link the list.
+		if (nextThread != 0)
+		{
+			users[nextThread].prev = users[nextThread - 1];
+		}
+
 		pthread_create(&clients[nextThread], NULL, connectToChat,
-			   	(void *) &users[nextThread]);
+			   	(void *) &users);
 		nextThread++;
 
 		close(new_fd);
@@ -125,15 +131,23 @@ int chat(User *usr)
 	char msgBuffer[MAX_MSG_SIZE] = {0};
 	int bytesReceived;
 	int limit = MAX_MSG_SIZE + MAX_NICK_LENGTH + 2;
+	int i;
 
 	while(1)
 	{
 		memset(&msgBuffer, 0, sizeof msgBuffer);
 
-		if((bytesReceived = recv(usr->sockNum, (void *) msgBuffer, limit,
-					   	MSG_DONTWAIT)) != limit)
+		bytesReceived = recv(usr->sockNum, (void *) msgBuffer, limit,
+					   	MSG_DONTWAIT);
+
+		// User users should be a circular linked list.
+		for(i = 0; i < MAX_CLIENTS; i++)
 		{
-			perror("recv");
+			if(usr[i].threadNum != 0)
+			{
+				if(send(usr[i].sockNum, msgBuffer, sizeof msgBuffer, 0) == -1)
+					perror("send");
+			}
 		}
 	}
 	return 0;

@@ -34,6 +34,8 @@ typedef struct
 	char name[MAX_NICK_LENGTH];	// User display name.
 	int talkingIn;	// Channel number (0 = global)
 	int threadNum;	// Index of this client's thread in pthread_t clients[].
+	void *next = NULL;
+	void *prev = NULL;
 } User;
 
 // This function helps provide IP agnosticism re: IPv4 or IPv6.

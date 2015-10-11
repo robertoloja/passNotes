@@ -63,8 +63,13 @@ int main(void)
 
 	// Don't need servinfo anymore; res points to the valid address.
 	freeaddrinfo(servinfo);
-	changeNick(usrPtr);
 
+	// Populate user struct.
+	user.sockNum = sockfd;
+	changeNick(usrPtr);
+	chat(usrPtr, usrPtr->sockNum);
+
+	return 0;
 }
 
 int chat(User *userInfo, int sockfd)
@@ -80,9 +85,8 @@ int chat(User *userInfo, int sockfd)
 		if(message[0] == '/')
 		{
 			if(handleCommands(message, sockfd, ID) == 1)
-			{
 				exit(1);
-			}
+
 		} else {
 			strcat(toSend, userInfo->name);
 			strcat(toSend, ": ");
@@ -93,16 +97,15 @@ int chat(User *userInfo, int sockfd)
 				perror("send");
 			}
 		}
-
-		return 0;
 	}
+	return 0;
 }
 
 int changeNick(User *userInfo)
 {
 	char name[MAX_NICK_LENGTH];
 
-	printf("Enter username: ");
+	printf("\nEnter username: ");
 	scanf(" %s", name);
 	strcpy(name, userInfo->name);
 
