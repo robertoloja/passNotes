@@ -2,6 +2,7 @@
 //TODO: TESTS TESTS TESTS
 //TODO: Work out connection quitting.
 #include "passNotes.h"
+#include "server.h"
 #include <signal.h>
 #include <sys/wait.h>
 #include <pthread.h>
@@ -9,7 +10,6 @@
 #define ID 0 // Client is 1
 
 void sigchld_handler(int s);
-int chat(User *usr);
 void *connectToChat(void *clientInfo);
 
 int main(void)
@@ -124,31 +124,4 @@ void *connectToChat(void *clientInfo)
 	User *usr = (User *) clientInfo;
 	chat(usr);
 	return NULL;
-}
-
-int chat(User *usr)
-{
-	char msgBuffer[MAX_MSG_SIZE] = {0};
-	int bytesReceived;
-	int limit = MAX_MSG_SIZE + MAX_NICK_LENGTH + 2;
-	int i;
-
-	while(1)
-	{
-		memset(&msgBuffer, 0, sizeof msgBuffer);
-
-		bytesReceived = recv(usr->sockNum, (void *) msgBuffer, limit,
-					   	MSG_DONTWAIT);
-
-		// User users should be a circular linked list.
-		for(i = 0; i < MAX_CLIENTS; i++)
-		{
-			if(usr[i].threadNum != 0)
-			{
-				if(send(usr[i].sockNum, msgBuffer, sizeof msgBuffer, 0) == -1)
-					perror("send");
-			}
-		}
-	}
-	return 0;
 }
