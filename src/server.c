@@ -97,12 +97,6 @@ int main(void)
 		users[nextThread].sockNum = new_fd;
 		users[nextThread].threadNum = nextThread;
 
-		// Link the list.
-		if (nextThread != 0)
-		{
-			users[nextThread].prev = users[nextThread - 1];
-		}
-
 		pthread_create(&clients[nextThread], NULL, connectToChat,
 			   	(void *) &users);
 		nextThread++;
