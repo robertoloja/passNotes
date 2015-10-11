@@ -53,7 +53,7 @@ int handleCommands(const char *command, int sockfd, int id)
 	{
 		if (send(sockfd, "/ping", 6, 0) == -1)
 		{
-			perror("send");
+			//perror("send");
 			return -1;
 		}
 	}
