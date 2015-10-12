@@ -21,6 +21,9 @@ int chat(User *userInfo, int sockfd)
 
 	while(1)
 	{
+		message[0] = '\0';
+		toSend[0] = '\0';
+
 		printf("Me: ");
 		scanf(" %s", message);
 
