@@ -1,4 +1,3 @@
-#include "passNotes.h"
 #include "client.h"
 
 int changeNick(User *userInfo);
@@ -8,7 +7,7 @@ int main(void)
 	int sockfd;
 	//char msgBuffer[MAX_MSG_SIZE];
 	struct addrinfo hints, *servinfo, *res;
-	User user, *usrPtr = &user;
+	User user;
 	int rv;
 	char s[INET6_ADDRSTRLEN];
 
@@ -63,8 +62,9 @@ int main(void)
 
 	// Populate user struct.
 	user.sockNum = sockfd;
-	changeNick(usrPtr);
-	chat(usrPtr, usrPtr->sockNum);
+	changeNick(&user);
+	if (chat(&user) == 0)
+		return 0;
 
 	return 0;
 }
