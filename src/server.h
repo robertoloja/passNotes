@@ -9,13 +9,14 @@ int chat(User *usr)
 
 	while(1)
 	{
+		bytesReceived = 0;
 		memset(&msgBuffer, 0, sizeof msgBuffer);
 		msgBuffer[0] = '\0';
 
 		if((bytesReceived = recv(usr->sockNum, (void *) msgBuffer, limit,
-					   	MSG_DONTWAIT)) != 0)
+						MSG_DONTWAIT)) != -1)
 		{
-			printf("Received: \"%s\"", msgBuffer);
+			printf("Received: \"%s\"\n", msgBuffer);
 
 			while (ptr != NULL) // Go to head.
 				ptr = ptr->prev;
