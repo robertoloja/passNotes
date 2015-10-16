@@ -26,9 +26,6 @@ int main(void)
 	int nextThread = 0;
 	User users[MAX_CLIENTS] = {{0}};
 
-	//char msgBuffer[MAX_MSG_SIZE];
-	//int bytesReceived;
-
 	memset(&hints, 0, sizeof hints);
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_STREAM;

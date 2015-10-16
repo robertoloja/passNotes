@@ -1,12 +1,12 @@
 CC=gcc
 BUILD_DIR=./build
 SRC_DIR=./src
-CFLAGS=-g -pthread -Wall
+CFLAGS=-g -Wall 
 
 all: $(BUILD_DIR)/server $(BUILD_DIR)/client
 
 $(BUILD_DIR)/server: $(SRC_DIR)/server.o
-	$(CC) -o $(BUILD_DIR)/server $(SRC_DIR)/server.o 
+	$(CC) -o $(BUILD_DIR)/server $(SRC_DIR)/server.o -lpthread
 
 $(BUILD_DIR)/client: $(SRC_DIR)/client.o
 	$(CC) -o $(BUILD_DIR)/client $(SRC_DIR)/client.o
