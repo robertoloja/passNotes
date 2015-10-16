@@ -95,9 +95,15 @@ int main(void)
 		users[nextThread].threadNum = nextThread;
 
 		pthread_create(&clients[nextThread], NULL, connectToChat,
-			   	(void *) &users);
-		nextThread++;
+			   	(void *) &users[nextThread]);
 
+		// Update linked list.
+		if (nextThread != 0)
+		{
+			users[nextThread].prev = &users[nextThread -1];
+			users[nextThread - 1].next = &users[nextThread];
+		}
+		nextThread++;
 		close(new_fd);
 	}
 }

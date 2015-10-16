@@ -28,16 +28,17 @@ say, this is non-portable. */
 #define NONE "\x1B[0m"
 
 // Client information struct.
-typedef struct 
+struct User
 {
 	int sockNum;	// This client's socket file descriptor.
 	char name[MAX_NICK_LENGTH];	// User display name.
 	int talkingIn;	// Channel number (0 = global)
 	int threadNum;	// Index of this client's thread in pthread_t clients[].
 	int userID;		// Unique ID.
-	void *next;
-	void *prev;
-} User;
+	struct User *next;
+	struct User *prev;
+};
+typedef struct User User;
 
 // This function helps provide IP agnosticism re: IPv4 or IPv6.
 void *get_in_addr(struct sockaddr *sa)
