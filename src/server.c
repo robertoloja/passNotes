@@ -2,6 +2,7 @@
 //TODO: TESTS TESTS TESTS
 //TODO: Work out connection quitting.
 #include "passNotes.h"
+#include "server.h"
 #include <signal.h>
 #include <sys/wait.h>
 #include <pthread.h>
@@ -9,7 +10,6 @@
 #define ID 0 // Client is 1
 
 void sigchld_handler(int s);
-int chat(User *usr);
 void *connectToChat(void *clientInfo);
 
 int main(void)
@@ -25,9 +25,6 @@ int main(void)
 	pthread_t clients[MAX_CLIENTS];
 	int nextThread = 0;
 	User users[MAX_CLIENTS] = {{0}};
-
-	//char msgBuffer[MAX_MSG_SIZE];
-	//int bytesReceived;
 
 	memset(&hints, 0, sizeof hints);
 	hints.ai_family = AF_UNSPEC;
@@ -98,7 +95,7 @@ int main(void)
 		users[nextThread].threadNum = nextThread;
 
 		pthread_create(&clients[nextThread], NULL, connectToChat,
-			   	(void *) &users[nextThread]);
+			   	(void *) &users);
 		nextThread++;
 
 		close(new_fd);
@@ -118,23 +115,4 @@ void *connectToChat(void *clientInfo)
 	User *usr = (User *) clientInfo;
 	chat(usr);
 	return NULL;
-}
-
-int chat(User *usr)
-{
-	char msgBuffer[MAX_MSG_SIZE] = {0};
-	int bytesReceived;
-	int limit = MAX_MSG_SIZE + MAX_NICK_LENGTH + 2;
-
-	while(1)
-	{
-		memset(&msgBuffer, 0, sizeof msgBuffer);
-
-		if((bytesReceived = recv(usr->sockNum, (void *) msgBuffer, limit,
-					   	MSG_DONTWAIT)) != limit)
-		{
-			perror("recv");
-		}
-	}
-	return 0;
 }
