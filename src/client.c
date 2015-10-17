@@ -1,11 +1,8 @@
 #include "client.h"
 
-int changeNick(User *userInfo);
-
 int main(void)
 {
 	int sockfd;
-	//char msgBuffer[MAX_MSG_SIZE];
 	struct addrinfo hints, *servinfo, *res;
 	User user;
 	int rv;
@@ -41,7 +38,6 @@ int main(void)
 			perror("client: connect");
 			continue;
 		}
-
 		break;
 	}
 
@@ -57,11 +53,12 @@ int main(void)
 			s, sizeof s);
 	printf("client: connecting to %s", s);
 
+	user.sockNum = sockfd;
+
 	// Don't need servinfo anymore; res points to the valid address.
 	freeaddrinfo(servinfo);
 
 	// Populate user struct.
-	user.sockNum = sockfd;
 	changeNick(&user);
 	if (chat(&user) == 0)
 		return 0;

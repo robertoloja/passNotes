@@ -13,8 +13,8 @@ int chat(User *usr)
 		memset(&msgBuffer, 0, sizeof msgBuffer);
 		msgBuffer[0] = '\0';
 
-		if((bytesReceived = recv(usr->sockNum, (void *) msgBuffer, limit,
-						MSG_DONTWAIT)) != -1)
+		if((bytesReceived = recv(usr->sockNum, (void *) msgBuffer, limit, 
+						MSG_WAITALL)) != -1)
 		{
 			printf("Received: \"%s\"\n", msgBuffer);
 

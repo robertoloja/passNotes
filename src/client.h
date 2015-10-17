@@ -24,6 +24,7 @@ int chat(User *userInfo)
 		memset(&message, 0, sizeof message);
 		memset(&toSend, 0, sizeof toSend);
 
+		printf("\nsockNum = %d\n", userInfo->sockNum);
 		printf("Me: ");
 		scanf(" %s", message);
 
@@ -33,13 +34,11 @@ int chat(User *userInfo)
 				return 0;
 
 		} else {
-			strcat(toSend, userInfo->name);
-			strcat(toSend, ": ");
-			strcat(toSend, message);
-
-			if(send(userInfo->sockNum, toSend, sizeof toSend, 0) == -1)
+			if(send(userInfo->sockNum, message, sizeof message, MSG_NOSIGNAL) 
+					== -1)
 				perror("send");
 		}
+		printf("\nsockNum = %d\n", userInfo->sockNum);
 	}
 	return 0;
 }
